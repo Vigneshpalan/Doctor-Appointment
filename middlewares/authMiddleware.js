@@ -1,24 +1,51 @@
 const JWT = require("jsonwebtoken");
 
-module.exports = async (req, res, next) => {
+const authMiddleware = async (req, res, next) => {
   try {
-    const token = req.headers["authorization"].split(" ")[1];
-    JWT.verify(token, process.env.JWT_SECRET, (err, decode) => {
-      if (err) {
-        return res.status(200).send({
-          message: "Auth Fialed",
-          success: false,
-        });
-      } else {
-        req.body.userId = decode.id;
-        next();
-      }
-    });
+    const authorizationHeader = req.headers["authorization"];
+
+    if (!authorizationHeader) {
+      return res.status(401).send({
+        message: "Authorization header is missing",
+        success: false,
+      });
+    }
+
+    const token = authorizationHeader.split(" ")[1];
+
+    const decode = await verifyToken(token);
+
+    if (decode) {
+      req.body.userId = decode.id;
+      next();
+    } else {
+      return res.status(401).send({
+        message: "Auth Failed",
+        success: false,
+      });
+    }
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(401).send({
       message: "Auth Failed",
       success: false,
     });
   }
 };
+
+
+
+
+const verifyToken = (token) => {
+  return new Promise((resolve, reject) => {
+    JWT.verify(token, process.env.JWT_SECRET, (err, decode) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(decode);
+      }
+    });
+  });
+};
+
+module.exports = authMiddleware;

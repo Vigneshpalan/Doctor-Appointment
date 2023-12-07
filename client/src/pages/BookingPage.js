@@ -7,6 +7,7 @@ import Layout from "../components/Layout";
 import { hideLoading, showLoading } from "../redux/features/alertSlice";
 import "./../styles/LayoutStyles.css";
 
+
 const BookingPage = () => {
   const { user } = useSelector((state) => state.user);
   const params = useParams();
@@ -29,6 +30,7 @@ const BookingPage = () => {
       );
       if (res.data.success) {
         setDoctors(res.data.data);
+       
       }
     } catch (error) {
       console.log(error);
@@ -69,20 +71,20 @@ const handleAvailability = async () => {
   // =============== booking func
   const handleBooking = async () => {
     try {
-      setIsAvailable(true);
-      if (!date && !time) {
-        return alert("Date & Time Required");
+
+      if (!date || !time || !params.doctorId || !user._id) {
+        return alert("Date, Time, Doctor ID, and User ID are required.");
       }
       dispatch(showLoading());
       const res = await axios.post(
         "/api/user/book-appointment",
         {
-          doctorId: params.doctorId,
-          userId: user._id,
-          doctorInfo: doctors,
-          userInfo: user,
+          doctorId: params.doctorId,  // Add doctorId
+          userId: user._id,  // Add userId
           date: date,
           time: time,
+          doctorInfo:doctors.firstName,
+          userInfo: user.name,
         },
         {
           headers: {
@@ -92,6 +94,7 @@ const handleAvailability = async () => {
       );
       dispatch(hideLoading());
       if (res.data.success) {
+        
         message.success(res.data.message);
       } else {
         message.error(res.data.message);
@@ -101,6 +104,9 @@ const handleAvailability = async () => {
       console.log(error);
     }
   };
+  
+ 
+  
   
 
   useEffect(() => {
@@ -126,16 +132,16 @@ const handleAvailability = async () => {
               </h6>
               <div className="appoint-card-body">
                 <div className="d-flex flex-column w-50 mx-auto">
-                  <DatePicker
-                    className="m-2 date-picker"
-                    format="DD-MM-YYYY"
-                    onChange={(value) => {
-                      const selectedDate = value
-                        ? value.format("DD-MM-YYYY")
-                        : "";
-                      setDate(selectedDate);
-                    }}
-                  />
+                <DatePicker
+  className="m-2 date-picker"
+  format="DD-MM-YYYY" // This format is for display
+  onChange={(value) => {
+    const selectedDate = value
+      ? value.format("DD-MM-YYYY") // This format is for parsing and saving
+      : "";
+    setDate(selectedDate);
+  }}
+/>
                   <TimePicker
                     format="HH:mm"
                     className="m-2 time-picker"

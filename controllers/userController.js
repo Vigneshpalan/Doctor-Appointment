@@ -83,8 +83,12 @@ const authController = async (req, res) => {
 // Appply Doctor Controller
 const applyDoctorController = async (req, res) => {
   try {
-    const newDoctor = await doctorModel({ ...req.body, status: "pending" });
+    // Remove the doctorId from the request body, as it's generated automatically
+    const { doctorId, ...doctorData } = req.body;
+
+    const newDoctor = await doctorModel({ ...doctorData, status: "pending" });
     await newDoctor.save();
+    
     const adminUser = await userModel.findOne({ isAdmin: true });
     const notification = adminUser.notification;
     notification.push({
@@ -97,6 +101,7 @@ const applyDoctorController = async (req, res) => {
       },
     });
     await userModel.findByIdAndUpdate(adminUser._id, { notification });
+    
     res.status(201).send({
       success: true,
       message: "Doctor Account Applied Successfully",
@@ -110,6 +115,7 @@ const applyDoctorController = async (req, res) => {
     });
   }
 };
+
 
 // Notification controller
 const getAllNotificationController = async (req, res) => {
@@ -178,7 +184,6 @@ const getAllDocotrsController = async (req, res) => {
   }
 };
 
-// Checking Availability 
 const bookingAvailabilityController = async (req, res) => {
   try {
     const date = moment(req.body.date, "DD-MM-YYYY").toISOString();
@@ -200,7 +205,7 @@ const bookingAvailabilityController = async (req, res) => {
       });
     }
     const appointments = await appointmentModel.find({
-      doctorId,
+      doctor: doctorId,
       date,
       time: startTime,
     });
@@ -223,140 +228,48 @@ const bookingAvailabilityController = async (req, res) => {
     });
   }
 };
+const mongoose = require('mongoose');
 
-
-//BOOK APPOINTMENT
-/*const bookAppointmentController = async (req, res) => {
-  try {
-    const date = moment(req.body.date, "DD-MM-YYYY").toISOString();
-    const startTime = moment(req.body.time, "HH:mm").toISOString();
-    const doctorId = req.body.doctorId;
-    const doctor = await doctorModel.findById(doctorId);
-    if (!doctor) {
-      return res.status(404).send({
-        message: "Doctor not found",
-        success: false,
-      });
-    }
-    const start = moment(doctor.starttime, "HH:mm").toISOString();
-    const end = moment(doctor.endtime, "HH:mm").toISOString();
-    if (!moment(startTime).isBetween(start, end, undefined, "[]")) {
-      return res.status(400).send({
-        message: "Selected time is not within doctor's available range",
-        success: false,
-      });
-    }
-    const appointments = await appointmentModel.find({
-      doctorId,
-      date,
-    });
-    if (appointments.length >= doctor.maxPatientsPerDay) {
-      return res.status(400).send({
-        message: "Maximum number of appointments reached for this day",
-        success: false,
-      });
-    }
-    const newAppointment = new appointmentModel({
-      doctorId,
-      userId: req.body.userId,
-      date,
-      time: startTime,
-      doctorInfo: req.body.doctorInfo,
-      userInfo: req.body.userInfo,
-    });
-    await newAppointment.save();
-    return res.status(200).send({
-      success: true,
-      message: "Appointment Booked Successfully",
-    });
-  } catch (error) {
-    console.log(error);
-    res.status(500).send({
-      success: false,
-      error,
-      message: "Error In Booking Appointment",
-    });
-  }
-};*/
 
 const bookAppointmentController = async (req, res) => {
   try {
-    const date = moment(req.body.date, "DD-MM-YYYY").toISOString();
-    const startTime = moment(req.body.time, "HH:mm").toISOString();
-    const doctorId = req.body.doctorId;
-    const doctor = await doctorModel.findById(doctorId);
-    if (!doctor) {
-      return res.status(404).send({
-        message: "Doctor Not Found",
-        success: false,
-      });
-    }
-    const start = moment(doctor.starttime, "HH:mm").toISOString();
-    const end = moment(doctor.endtime, "HH:mm").toISOString();
-    if (!moment(startTime).isBetween(start, end, undefined, "[]")) {
-      return res.status(400).send({
-        message: "Selected Time Is Not Within Doctor's Available Range",
-        success: false,
-      });
-    }
-    const appointments = await appointmentModel.find({
+    // Extract necessary data from the request
+    const { doctorId, userId, date, time, doctorInfo, userInfo } = req.body;
+
+    // Create the appointment in your database
+    const newAppointment = new  appointmentModel({
       doctorId,
+      userId,
       date,
-      status: "approved"
+      time,
+      doctorInfo,
+      userInfo,
     });
-    if (appointments.length >= doctor.maxPatientsPerDay) {
-      return res.status(400).send({
-        message: "Maximum Number Of Appointments Reached For This Day",
-        success: false,
-      });
-    }
-    const existingAppointment = await appointmentModel.findOne({
-      doctorId,
-      date,
-      time: startTime,
-      status: "approved"
-    });
-    if (existingAppointment) {
-      return res.status(400).send({
-        message: "Appointment Already Booked For This Time Slot",
-        success: false,
-      });
-    }
-    const newAppointment = new appointmentModel({
-      doctorId,
-      userId: req.body.userId,
-      date,
-      time: startTime,
-      doctorInfo: req.body.doctorInfo,
-      userInfo: req.body.userInfo,
-    });
+
+    // Save the appointment
     await newAppointment.save();
-    return res.status(200).send({
-      success: true,
-      message: "Appointment Booked Successfully",
-    });
+
+    // Send a success response
+    res.status(201).json({ success: true, message: 'Appointment booked successfully.' });
   } catch (error) {
-    console.log(error);
-    res.status(500).send({
-      success: false,
-      error,
-      message: "Error In Booking Appointment",
-    });
+    // Handle errors
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Failed to book the appointment.' });
   }
 };
 
 
-
-
-
 const userAppointmentsController = async (req, res) => {
   try {
-    const appointments = await appointmentModel.find({
-      userId: req.body.userId,
-    });
+  
+    const userId = req.body.userId;
+
+    // Fetch user-specific appointments by filtering based on userId
+    const appointments = await appointmentModel.find({ userId });
+
     res.status(200).send({
       success: true,
-      message: "Users Appointments Fetch Successfully",
+      message: "User Appointments Fetched Successfully",
       data: appointments,
     });
   } catch (error) {
@@ -364,9 +277,207 @@ const userAppointmentsController = async (req, res) => {
     res.status(500).send({
       success: false,
       error,
-      message: "Error In User Appointments",
+      message: "Error Fetching User Appointments",
     });
   }
 };
 
-module.exports = { loginController, registerController, authController , applyDoctorController, getAllNotificationController, deleteAllNotificationController, getAllDocotrsController, bookAppointmentController, bookingAvailabilityController, userAppointmentsController};
+const Review = require('../models/reviewSchema');
+
+// Create a new review
+const addReview = async (req, res) => {
+  try {
+    const { name, rating, comment } = req.body;
+    const { doctorId } = req.body.userId; // Assuming you have a middleware to get the user from the request
+    const review = new Review({ name, doctorId, rating, comment });
+    await review.save();
+    res.status(201).json({ success: true, data: review });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, error: 'An error occurred while adding the review.' });
+  }
+};
+
+
+
+// Get all reviews
+const getReviews = async (req, res) => {
+  try {
+    const { userId } = req.body.userId; // Assuming you have a middleware to get the user from the request
+    const reviews = await Review.find({ userId });
+    res.status(200).json({ success: true, data: reviews });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, error: 'An error occurred while fetching reviews.' });
+  }
+};
+const getUserByIdController = async (req, res) => {
+  try {
+    const user = await userModel.findOne({ _id: req.body.userId });
+
+    if (!user) {
+      console.log("User not found for userId: " + req.body.userId);
+      return res.status(404).send({
+        success: false,
+        message: "User not found for the provided user ID",
+      });
+    }
+
+    let imageData = null;
+
+    if (user.image) {
+      // Convert buffer to base64
+      imageData = user.image.toString('base64');
+    }
+
+    res.status(200).send({
+      success: true,
+      message: "User Info Fetched",
+      data: {
+        ...user.toObject(),
+        image: imageData,
+      },
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      error,
+      message: "Error in User Info Fetching",
+    });
+  }
+};
+
+
+// Multer configuration
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+const uploadDir = path.join(__dirname, 'uploads');
+
+// Create the 'uploads' directory if it doesn't exist
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
+}
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    const uploadDir = path.join(__dirname, 'uploads');
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  },
+});
+
+const upload = multer({
+  storage: storage,
+  fileFilter: function (req, file, cb) {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only JPEG, PNG, and JPG files are allowed'), false);
+    }
+  },
+});
+
+
+const updateUserProfileController = async (req, res) => {
+  try {
+    // Access the user ID from the middleware
+    const userId = req.body.userId || req.user._id;
+
+    // Find the user by _id
+    const user = await userModel.findByIdAndUpdate(
+      userId,
+      { name: req.body.name, email: req.body.email },
+      { new: true }
+    );
+
+    // If the user is not found, return an error response
+    if (!user) {
+      return res.status(404).send({
+        success: false,
+        message: 'User not found',
+      });
+    }
+
+    // If a profile image is provided, update the user's image
+    if (req.file) {
+      user.image = req.file.buffer;
+    }
+
+    // Save the updated user
+    await user.save();
+
+    // Fetch the user again to get the updated information
+    const updatedUser = await userModel.findById(user._id);
+
+    res.status(201).send({
+      success: true,
+      message: 'User Profile Updated',
+      data: updatedUser,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      success: false,
+      message: 'User Profile Update Issue',
+      error,
+    });
+  }
+};
+const cloudinary = require('cloudinary').v2;
+
+const retrive=async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    // Retrieve user record from the database
+    const user = await userModel.findOne({ userId });
+
+    if (!user || !user.imagePublicId) {
+      return res.status(404).json({ success: false, message: 'User not found or no image available' });
+    }
+
+    // Construct the Cloudinary URL using the public ID
+    const imageUrl = cloudinary.url(user.imagePublicId);
+
+    res.json({ success: true, imageUrl });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+};
+
+
+const image =async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    // Check if file is present in the request
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No image uploaded' });
+    }
+
+    // Upload image to Cloudinary
+    const result = await cloudinary.uploader.upload(req.file.buffer);
+
+    // Update or create user record in the database with the Cloudinary public ID
+    await userModel.findOneAndUpdate(
+      { userId },
+      { imagePublicId: result.public_id },
+      { upsert: true, new: true }
+    );
+
+    res.json({ success: true, imageUrl: result.secure_url });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Internal Server Error' });
+  }
+};
+
+
+module.exports = {addReview,upload, image,retrive ,updateUserProfileController,getUserByIdController, getReviews , loginController, registerController, authController , applyDoctorController, getAllNotificationController, deleteAllNotificationController, getAllDocotrsController, bookAppointmentController, bookingAvailabilityController, userAppointmentsController};

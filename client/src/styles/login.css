@@ -1,0 +1,71 @@
+.header {
+    background-color: #3498db;
+    color: white;
+    padding: 20px;
+    border: 1px solid #3498db;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  }
+  .body{
+    font-family: Arial, sans-serif;
+    margin: 0;
+   
+    padding: 0;
+    text-align: center;
+  }
+  /* Navigation Styles */
+  .navigation {
+    display: flex;
+    justify-content: center;
+    background-color: #f2f2f2;
+    padding: 15px 0;
+    border: 1px solid #f2f2f2;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  }
+  
+  .navigation a {
+    margin: 0 15px;
+    text-decoration: none;
+    color: #333;
+  }
+  
+  .navigation a:hover {
+    text-decoration: underline;
+  }
+  
+  /* Section Styles */
+  .section {
+    padding: 50px 20px;
+    text-align: center;
+    border: 1px solid #f2f2f2;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    margin: 20px;
+  }
+  
+  /* Footer Styles */
+  .footer {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 20px;
+    border-top: 1px solid #666;
+  }
+  
+  /* Responsive Styles */
+  @media (max-width: 768px) {
+    /* Adjust styles for screens up to 768px wide */
+    .header, .navigation, .section, .footer {
+      margin: 10px; /* Add margin for smaller screens */
+    }
+  }
+  .header-image-container {
+    text-align: center; /* Center align the image */
+  }
+  
+  .header-image {
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto; /* Center align horizontally by using margin: 0 auto; */
+  }

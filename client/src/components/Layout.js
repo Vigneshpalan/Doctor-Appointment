@@ -34,15 +34,27 @@ const Layout = ({ children }) => {
       path: `/doctor/profile/${user?._id}`,
       icon: "fa-solid fa-user",
     },
+    {name:"Healthrecord",
+      path:"/health",
+      icon:"fa-solid fa-file-waveform",
+
+    },
+    {name:"userFeedback",
+    path:"/docr",
+    icon:"fa-solid fa-comment-dots",
+
+  }
+
   ];
   // =========== doctor menu ===============
 
   // rendering menu list
-  const SidebarMenu = user?.isAdmin
-    ? adminMenu.filter((menu) => menu.name !== "Profile")
-    : user?.isDoctor
-    ? doctorMenu
-    : userMenu.filter((menu) => menu.name !== "Profile");
+  const SidebarMenu = [
+    ...user?.isAdmin ? adminMenu : [],
+    ...user?.isDoctor ? doctorMenu : [],
+    ...!user?.isAdmin && !user?.isDoctor ? userMenu : [],
+  ];
+  
 
   return (
     <>
@@ -50,7 +62,7 @@ const Layout = ({ children }) => {
         <div className="layout">
           <div className="sidebar">
             <div className="logo">
-              <h6>AppointDoc</h6>
+              <h6>DASHBOARD</h6>
               <hr />
             </div>
             <div className="menu">
@@ -94,6 +106,7 @@ const Layout = ({ children }) => {
           </div>
         </div>
       </div>
+     
     </>
   );
 };

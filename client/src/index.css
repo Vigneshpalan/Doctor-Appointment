@@ -14,6 +14,8 @@
 /*register page*/
 
 .register-page {
+  background-image: url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRUOHtB6c6zHEUgAhMD-aBsgijHIJcv1MXMPQ&usqp=CAU');
+
   display: flex;
   align-items: center;
   justify-content: center;
@@ -66,4 +68,56 @@
 
 .register-page .btn-primary {
   width: 100%;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #ddd;
+}
+
+/* Global table row styles */
+table tr {
+  background-color: #f2f2f2;
+}
+
+/* Global table cell (td and th) styles */
+table th,
+table td {
+  padding: 8px;
+  text-align: left;
+}
+
+/* Global table header (th) styles */
+table th {
+  background-color: #4CAF50;
+  color: white;
+}
+
+/* Define alternate row styles for better readability */
+table tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+/* Center align the h3 */
+h3 {
+  text-align: center;
+}
+
+/* Add some margin to the form */
+.form-container {
+  margin: 20px;
+}
+
+/* Style the form fields and labels */
+.form-field {
+  margin-bottom: 16px;
+}
+
+.form-label {
+  font-weight: bold;
+}
+
+/* Style the update button */
+.update-button {
+  display: block;
+  margin: 0 auto;
 }

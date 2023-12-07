@@ -13,7 +13,18 @@ export const userMenu = [
     name: "Apply Doctor",
     path: "/apply-doctor",
     icon: "fa-solid fa-user-doctor",
-  }
+  },
+  {
+    name: "Profile",
+    path: '/userprofile/:id',
+    icon: "fa-solid fa-user",
+  },
+  {name:"Reviews",
+      path:"/review/:recordId/:doctorId",
+      icon:"fa-solid fa-comment-dots",
+    }
+ 
+
 ];
 
 // admin menu

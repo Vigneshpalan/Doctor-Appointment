@@ -1,10 +1,13 @@
 const express = require("express");
+const multer = require('multer');
+const storage = multer.memoryStorage(); // Store files in memory as binary data
+const upload = multer({ storage: storage }).single('file');
 const {
   getDoctorInfoController,
   updateProfileController,
   getDoctorByIdController,
-  doctorAppointmentsController,
-  updateStatusController,
+  doctorAppointmentsController,delr,
+  updateStatusController,getdocreviews, shareHealthRecords
 } = require("../controllers/doctorController");
 const authMiddleware = require("../middlewares/authMiddleware");
 const router = express.Router();
@@ -23,5 +26,7 @@ router.get("/doctor-appointments", authMiddleware, doctorAppointmentsController)
 
 //POST Update Status
 router.post("/update-status", authMiddleware, updateStatusController);
-
+router.get("/dr", authMiddleware, getdocreviews);
+router.post("/del/:reviewId", authMiddleware, delr);
+router.post('/share',shareHealthRecords);
 module.exports = router;

@@ -1,9 +1,9 @@
-import { Table } from "antd";
+import { Table, Button } from "antd";
 import axios from "axios";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
 import Layout from "./../components/Layout";
-
+import { Link } from "react-router-dom"; // Import Link from react-router-dom
 
 const Appointments = () => {
   const [appointments, setAppointments] = useState([]);
@@ -17,6 +17,7 @@ const Appointments = () => {
       });
       if (res.data.success) {
         setAppointments(res.data.data);
+        
       }
     } catch (error) {
       console.log(error);
@@ -24,27 +25,37 @@ const Appointments = () => {
   };
 
   useEffect(() => {
+    
     getAppointments();
   }, []);
 
   const columns = [
     {
-      title: "ID",
-      dataIndex: "_id",
+      title: "FristName",
+      dataIndex: "doctorInfo",
     },
     {
       title: "Date & Time",
       dataIndex: "date",
       render: (text, record) => (
         <span>
-          {moment(record.date).format("DD-MM-YYYY")} &nbsp;
-          {moment(record.time).format("HH:mm")}
+          
+          {moment(record.date).format("DD-MM-YYYY HH:mm")} &nbsp;
+          {record.time}
         </span>
       ),
     },
     {
       title: "Status",
       dataIndex: "status",
+    },
+    {
+      title: "Action",
+      render: (text, record) => (
+        <Link to={`/review/${record._id}/${record.doctorId}`}> {/* Use Link to navigate to the review page */}
+          <Button type="primary">Review</Button>
+        </Link>
+      ),
     },
   ];
 
