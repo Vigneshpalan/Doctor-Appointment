@@ -26,11 +26,7 @@ app.use(express.static('public'));
 const port = process.env.PORT || 4000;
 
           
-cloudinary.config({ 
-  cloud_name: 'ds3qlgaxa', 
-  api_key: '414672861223827', 
-  api_secret: 'qH-ox25wdSV24o-71CSAP1A4Vc0' 
-});
+
 //listen port
 app.listen(port, () => {
   console.log(
